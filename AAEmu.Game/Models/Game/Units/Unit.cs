@@ -41,10 +41,16 @@ namespace AAEmu.Game.Models.Game.Units
         public bool ForceAttack { get; set; }
         public bool Invisible { get; set; }
 
-        public Unit Master { get; set; }
+        public uint OwnerId { get; set; }
         public SkillTask SkillTask { get; set; }
         public Dictionary<uint, List<Bonus>> Bonuses { get; set; }
         public Expedition Expedition { get; set; }
+
+        /// <summary>
+        /// Unit巡逻
+        /// 指明Unit巡逻路线及速度、是否正在执行巡逻等行为
+        /// </summary>
+        public Patrol Patrol { get; set; }
 
         public Unit()
         {
@@ -58,21 +64,23 @@ namespace AAEmu.Game.Models.Game.Units
             Hp = Math.Max(Hp - value, 0);
             if (Hp == 0) {
                 DoDie(attacker);
-                StopRegen();
-            } else
-                StartRegen();
-            BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Mp), true);
+                //StopRegen();
+            } //else
+                //StartRegen();
+            BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Hp>0?Mp:0), true);
         }
 
         public virtual void DoDie(Unit killer)
         {
             Effects.RemoveEffectsOnDeath();
             BroadcastPacket(new SCUnitDeathPacket(ObjId, 1, killer), true);
+            if(CurrentTarget!=null)
+                BroadcastPacket(new SCCombatClearedPacket(CurrentTarget.ObjId), true);
         }
 
         public void StartRegen()
         {
-            if (_regenTask != null || (Hp >= MaxHp && Mp >= MaxMp))
+            if (_regenTask != null || (Hp >= MaxHp && Mp >= MaxMp) || Hp == 0)
                 return;
             _regenTask = new UnitPointsRegenTask(this);
             TaskManager.Instance.Schedule(_regenTask, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));

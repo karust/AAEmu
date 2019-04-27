@@ -21,7 +21,13 @@ namespace AAEmu.Game.Scripts.Commands
 
         public void Execute(Character character, string[] args)
         {
-            ExpeditionManager.Instance.CreateExpedition(args[0], character);
+            if (args.Length == 0)
+            {
+                character.SendMessage("[TestGuild] /test_guild <GuildName>");
+                return;
+            }
+
+            ExpeditionManager.Instance.CreateExpedition(args[0], character.Connection);
         }
     }
 }

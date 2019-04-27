@@ -92,6 +92,7 @@ namespace AAEmu.Game.Models.Game.Char
                         item.Slot = reader.GetInt32("slot");
                         item.Count = reader.GetInt32("count");
                         item.LifespanMins = reader.GetInt32("lifespan_mins");
+                        item.MadeUnitId = reader.GetUInt32("made_unit_id");
                         item.UnsecureTime = reader.GetDateTime("unsecure_time");
                         item.UnpackTime = reader.GetDateTime("unpack_time");
                         item.CreateTime = reader.GetDateTime("created_at");
@@ -171,9 +172,9 @@ namespace AAEmu.Game.Models.Game.Char
                     item.WriteDetails(details);
 
                     command.CommandText = "REPLACE INTO " +
-                                          "items(`id`,`type`,`template_id`,`slot_type`,`slot`,`count`,`details`,`lifespan_mins`,`unsecure_time`,`unpack_time`,`owner`,`created_at`,`grade`)" +
+                                          "items(`id`,`type`,`template_id`,`slot_type`,`slot`,`count`,`details`,`lifespan_mins`,`made_unit_id`,`unsecure_time`,`unpack_time`,`owner`,`created_at`,`grade`)" +
                                           " VALUES " +
-                                          "(@id,@type,@template_id,@slot_type,@slot,@count,@details,@lifespan_mins,@unsecure_time,@unpack_time,@owner,@created_at,@grade)";
+                                          "(@id,@type,@template_id,@slot_type,@slot,@count,@details,@lifespan_mins,@made_unit_id,@unsecure_time,@unpack_time,@owner,@created_at,@grade)";
 
                     command.Parameters.AddWithValue("@id", item.Id);
                     command.Parameters.AddWithValue("@type", item.GetType().ToString());
@@ -183,6 +184,7 @@ namespace AAEmu.Game.Models.Game.Char
                     command.Parameters.AddWithValue("@count", item.Count);
                     command.Parameters.AddWithValue("@details", details.GetBytes());
                     command.Parameters.AddWithValue("@lifespan_mins", item.LifespanMins);
+                    command.Parameters.AddWithValue("@made_unit_id", item.MadeUnitId);
                     command.Parameters.AddWithValue("@unsecure_time", item.UnsecureTime);
                     command.Parameters.AddWithValue("@unpack_time", item.UnpackTime);
                     command.Parameters.AddWithValue("@created_at", item.CreateTime);
@@ -305,9 +307,22 @@ namespace AAEmu.Game.Models.Game.Char
             return res;
         }
 
-        public bool CheckItems(uint templateId, int count)
+        public bool CheckItems(uint templateId, int count) => CheckItems(SlotType.Inventory, templateId, count);
+
+        public bool CheckItems(SlotType slotType, uint templateId, int count)
         {
-            foreach (var item in Items)
+            Item[] items = null;
+            if (slotType == SlotType.Inventory)
+                items = Items;
+            else if (slotType == SlotType.Equipment)
+                items = Equip;
+            else if (slotType == SlotType.Bank)
+                items = Bank;
+
+            if (items == null)
+                return false;
+
+            foreach (var item in items)
                 if (item != null && item.TemplateId == templateId)
                 {
                     count -= item.Count;
@@ -403,7 +418,7 @@ namespace AAEmu.Game.Models.Game.Char
 
         public bool TakeoffBackpack()
         {
-            Item backpack = GetItem(SlotType.Equipment, (byte)EquipmentItemSlot.Backpack);
+            var backpack = GetItem(SlotType.Equipment, (byte)EquipmentItemSlot.Backpack);
             if (backpack == null) return true;
 
             // Move to first available slot

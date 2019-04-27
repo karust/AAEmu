@@ -13,7 +13,7 @@ namespace AAEmu.Game.Core.Managers
 {
     public class FriendMananger : Singleton<FriendMananger>
     {
-        private static Logger _log = LogManager.GetCurrentClassLogger();
+        private readonly Logger _log = LogManager.GetCurrentClassLogger();
         private Dictionary<uint, FriendTemplate> _allFriends; // temp id, template
 
         public void Load()
@@ -42,6 +42,7 @@ namespace AAEmu.Game.Core.Managers
                     }
                 }
             }
+
             _log.Info("Loaded {0} friends", _allFriends.Count);
         }
 
@@ -55,18 +56,21 @@ namespace AAEmu.Game.Core.Managers
             if (_allFriends.ContainsKey(id)) _allFriends.Remove(id);
         }
 
-        public void SendStatusChange(Character owner, bool isOnline)
+        public void SendStatusChange(Character unit, bool forOnline, bool boolean)
         {
             if (_allFriends.Count <= 0) return;
             foreach (var (_, value) in _allFriends)
             {
-                if (value.FriendId != owner.Id) continue;
+                if (value.FriendId != unit.Id) continue;
 
                 var friendOwner = WorldManager.Instance.GetCharacterById(value.Owner);
                 if (friendOwner != null)
                 {
-                    var myInfos = FormatFriend(owner);
-                    myInfos.IsOnline = isOnline;
+                    var myInfos = FormatFriend(unit);
+                    if (forOnline)
+                        myInfos.IsOnline = boolean;
+                    else
+                        myInfos.InParty = boolean;
                     friendOwner.SendPacket(new SCFriendStatusChangedPacket(myInfos));
                 }
             }
@@ -105,8 +109,7 @@ namespace AAEmu.Game.Core.Managers
                             {
                                 Name = reader.GetString("name"),
                                 CharacterId = reader.GetUInt32("id"),
-                                Position = new Point(reader.GetUInt32("zone_id"),
-                                    reader.GetFloat("x"), reader.GetFloat("y"), reader.GetFloat("z")), // TODO - Hack
+                                Position = new Point(reader.GetUInt32("zone_id"), reader.GetFloat("x"), reader.GetFloat("y"), reader.GetFloat("z")),
                                 InParty = false,
                                 IsOnline = false,
                                 Race = (Race)reader.GetUInt32("race"),
@@ -122,6 +125,7 @@ namespace AAEmu.Game.Core.Managers
                     }
                 }
             }
+
             return friendsList;
         }
 
@@ -148,18 +152,18 @@ namespace AAEmu.Game.Core.Managers
                 }
             }
 
-            var friendInfo = GetFriendInfo(new List<uint> { friendId });
-            return friendInfo.Count > 0 ? GetFriendInfo(new List<uint> { friendId })[0] : null;
+            var friendInfo = GetFriendInfo(new List<uint> {friendId});
+            return friendInfo.Count > 0 ? GetFriendInfo(new List<uint> {friendId})[0] : null;
         }
 
-        private Friend FormatFriend(Character friend)
+        private static Friend FormatFriend(Character friend)
         {
             return new Friend()
             {
                 Name = friend.Name,
                 CharacterId = friend.Id,
-                Position = friend.Position.Clone(), // TODO - Hack
-                InParty = false, // TODO 
+                Position = friend.Position.Clone(),
+                InParty = friend.InParty,
                 IsOnline = true,
                 Race = friend.Race,
                 Level = friend.Level,

@@ -68,5 +68,30 @@ namespace AAEmu.Game.Utils
             var newY = (distance * (float)Math.Sin(rad)) + y;
             return (newX, newY);
         }
+
+        public static sbyte ConvertRadianToDirection(double radian) // TODO float zRot
+        {
+            var degree = RadianToDegree(radian);
+            if (degree < 0)
+                degree = 360 + degree;
+            var res = (sbyte)(degree / (360f / 128));
+            if (res > 85)
+                res = (sbyte)((degree - 360) / (360f / 128));
+            return res;
+        }
+
+        public static float CalculateDistance(Point loc, Point loc2, bool includeZAxis = false)
+        {
+            double dx = loc.X - loc2.X;
+            double dy = loc.Y - loc2.Y;
+
+            if (includeZAxis)
+            {
+                double dz = loc.Z - loc2.Z;
+                return (float)Math.Sqrt(dx * dx + dy * dy + dz * dz);
+            }
+
+            return (float)Math.Sqrt(dx * dx + dy * dy);
+        }
     }
 }

@@ -57,7 +57,7 @@ namespace AAEmu.Game.Core.Network.Game
             RegisterPacket(0x026, 1, typeof(CSSpawnCharacterPacket));
             RegisterPacket(0x027, 1, typeof(CSCancelCharacterDeletePacket));
             RegisterPacket(0x029, 1, typeof(CSNotifyInGamePacket));
-
+            RegisterPacket(0x02a, 1, typeof(CSNotifyInGameCompletedPacket));
             RegisterPacket(0x02b, 1, typeof(CSEditorGameModePacket));
             RegisterPacket(0x02c, 1, typeof(CSChangeTargetPacket));
             RegisterPacket(0x02d, 1, typeof(CSRequestCharBriefPacket));
@@ -87,11 +87,11 @@ namespace AAEmu.Game.Core.Network.Game
             RegisterPacket(0x047, 1, typeof(CSDepositMoneyPacket));
             RegisterPacket(0x048, 1, typeof(CSWithdrawMoneyPacket));
             RegisterPacket(0x049, 1, typeof(CSConvertItemLookPacket));
-
-
+            RegisterPacket(0x04a, 1, typeof(CSItemSecurePacket));
+            RegisterPacket(0x04b, 1, typeof(CSItemUnsecurePacket));
             RegisterPacket(0x04c, 1, typeof(CSEquipmentsSecurePacket));
-
-            RegisterPacket(0x02a, 1, typeof(CSNotifyInGameCompletedPacket));
+            RegisterPacket(0x04d, 1, typeof(CSEquipmentsUnsecurePacket));
+            RegisterPacket(0x04e, 1, typeof(CSResurrectCharacterPacket));
             RegisterPacket(0x04f, 1, typeof(CSSetForceAttackPacket));
             RegisterPacket(0x050, 1, typeof(CSChallengeDuelPacket));
             RegisterPacket(0x051, 1, typeof(CSStartDuelPacket));
@@ -104,7 +104,7 @@ namespace AAEmu.Game.Core.Network.Game
             RegisterPacket(0x059, 1, typeof(CSChangeHouseNamePacket));
             RegisterPacket(0x05a, 1, typeof(CSChangeHousePermissionPacket));
             //              RegisterPacket(0x05b, 1, typeof(CSChangeHousePayPacket)); TODO: this packet is not in the offsets
-            RegisterPacket(0x05b, 1, typeof(CSRequestHouseTaxPacket));
+            RegisterPacket(0x05c, 1, typeof(CSRequestHouseTaxPacket));
             // 0x5c unk packet
             RegisterPacket(0x05d, 1, typeof(CSAllowHousingRecoverPacket));
             RegisterPacket(0x05e, 1, typeof(CSSellHousePacket));
@@ -272,7 +272,8 @@ namespace AAEmu.Game.Core.Network.Game
             RegisterPacket(0x11d, 1, typeof(CSICSBuyGoodPacket));
             RegisterPacket(0x11e, 1, typeof(CSICSMoneyRequestPacket));
             // 0x12e CSEnterBeautySalonPacket
-            // 0x12f CSRankCharacterPacket
+            RegisterPacket(0x12F, 1, typeof(CSRankCharacterPacket));
+            RegisterPacket(0x125, 1, typeof(CSRequestSecondPasswordKeyTablesPacket));
             // 0x130 CSRankSnapshotPacket
             // 0x131 unk packet
             RegisterPacket(0x132, 1, typeof(CSIdleStatusPacket));
@@ -289,7 +290,7 @@ namespace AAEmu.Game.Core.Network.Game
             // 0x13d unk packet
             // 0x13e unk packet
             // 0x13f unk packet
-            // 0x140 unk packet
+            RegisterPacket(0x140, 1, typeof(CSSetupSecondPassword));
             // 0x141 unk packet
             // 0x142 unk packet
 

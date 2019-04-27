@@ -4,6 +4,7 @@ using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.DoodadObj;
+using AAEmu.Game.Models.Game.Housing;
 using AAEmu.Game.Models.Game.Units;
 using NLog;
 
@@ -110,13 +111,20 @@ namespace AAEmu.Game.Models.Game.World
 
                 var units = GetList(new List<Unit>(), obj.ObjId);
                 for (var i = 0; i < units.Count; i++)
+                {
                     character.SendPacket(new SCUnitStatePacket(units[i]));
+                    if (units[i] is House house)
+                        character.SendPacket(new SCHouseStatePacket(house));
+                }
 
-                var doodads = GetList(new List<Doodad>(), obj.ObjId);
-                if (doodads.Count > 0)
-                    character.SendPacket(new SCDoodadsCreatedPacket(doodads.ToArray()));
-
-                // TODO ... others types...
+                var doodads = GetList(new List<Doodad>(), obj.ObjId).ToArray();
+                for (var i = 0; i < doodads.Length; i += 30)
+                {
+                    var count = doodads.Length - i;
+                    var temp = new Doodad[count <= 30 ? count : 30];
+                    Array.Copy(doodads, i, temp, 0, temp.Length);
+                    character.SendPacket(new SCDoodadsCreatedPacket(temp));
+                }
             }
 
             // показать обьект всем игрокам в регионе
@@ -135,9 +143,8 @@ namespace AAEmu.Game.Models.Game.World
                 var character = (Character)obj;
 
                 var unitIds = GetListId<Unit>(new List<uint>(), obj.ObjId).ToArray();
-                for (var i = 0; i < unitIds.Length; i += 500)
+                for (var offset = 0; offset < unitIds.Length; offset += 500)
                 {
-                    var offset = i * 500;
                     var length = unitIds.Length - offset;
                     var temp = new uint[length > 500 ? 500 : length];
                     Array.Copy(unitIds, offset, temp, 0, temp.Length);
@@ -145,9 +152,8 @@ namespace AAEmu.Game.Models.Game.World
                 }
 
                 var doodadIds = GetListId<Doodad>(new List<uint>(), obj.ObjId).ToArray();
-                for (var i = 0; i < doodadIds.Length; i += 400)
+                for (var offset = 0; offset < doodadIds.Length; offset += 400)
                 {
-                    var offset = i * 400;
                     var length = doodadIds.Length - offset;
                     var last = length <= 400;
                     var temp = new uint[last ? length : 400];

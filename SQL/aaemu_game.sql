@@ -9,6 +9,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 
+DROP TABLE IF EXISTS `abilities`;
 CREATE TABLE IF NOT EXISTS `abilities` (
   `id` tinyint(3) UNSIGNED NOT NULL,
   `exp` int(11) NOT NULL,
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS `abilities` (
   PRIMARY KEY (`id`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `actabilities`;
 CREATE TABLE IF NOT EXISTS `actabilities` (
   `id` int(10) UNSIGNED NOT NULL,
   `point` int(10) UNSIGNED NOT NULL DEFAULT '0',
@@ -24,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `actabilities` (
   PRIMARY KEY (`owner`,`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `appellations`;
 CREATE TABLE IF NOT EXISTS `appellations` (
   `id` int(10) UNSIGNED NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '0',
@@ -31,16 +34,19 @@ CREATE TABLE IF NOT EXISTS `appellations` (
   PRIMARY KEY (`id`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `blocked`;
 CREATE TABLE IF NOT EXISTS `blocked` (
   `owner` int(11) NOT NULL,
   `blocked_id` int(11) NOT NULL,
   PRIMARY KEY (`owner`,`blocked_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `characters`;
 CREATE TABLE IF NOT EXISTS `characters` (
   `id` int(11) UNSIGNED NOT NULL,
   `account_id` int(11) UNSIGNED NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `access_level` int(3) UNSIGNED NOT NULL DEFAULT '0',
   `race` tinyint(2) NOT NULL,
   `gender` tinyint(1) NOT NULL,
   `unit_model_params` blob NOT NULL,
@@ -96,6 +102,7 @@ CREATE TABLE IF NOT EXISTS `characters` (
   PRIMARY KEY (`id`,`account_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `completed_quests`;
 CREATE TABLE IF NOT EXISTS `completed_quests` (
   `id` int(11) UNSIGNED NOT NULL,
   `data` tinyblob NOT NULL,
@@ -103,6 +110,7 @@ CREATE TABLE IF NOT EXISTS `completed_quests` (
   PRIMARY KEY (`id`,`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `expeditions`;
 CREATE TABLE IF NOT EXISTS `expeditions` (
   `id` int(11) NOT NULL,
   `owner` int(11) NOT NULL,
@@ -113,6 +121,39 @@ CREATE TABLE IF NOT EXISTS `expeditions` (
   PRIMARY KEY (`id`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `expedition_members`;
+CREATE TABLE IF NOT EXISTS `expedition_members` (
+  `character_id` int(11) NOT NULL,
+  `expedition_id` int(11) NOT NULL,
+  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `level` tinyint(4) UNSIGNED NOT NULL,
+  `role` tinyint(4) UNSIGNED NOT NULL,
+  `last_leave_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ability1` tinyint(4) UNSIGNED NOT NULL,
+  `ability2` tinyint(4) UNSIGNED NOT NULL,
+  `ability3` tinyint(4) UNSIGNED NOT NULL,
+  `memo` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  PRIMARY KEY (`character_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+
+DROP TABLE IF EXISTS `expedition_role_policies`;
+CREATE TABLE IF NOT EXISTS `expedition_role_policies` (
+  `expedition_id` int(11) NOT NULL,
+  `role` tinyint(4) UNSIGNED NOT NULL,
+  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `dominion_declare` tinyint(1) NOT NULL,
+  `invite` tinyint(1) NOT NULL,
+  `expel` tinyint(1) NOT NULL,
+  `promote` tinyint(1) NOT NULL,
+  `dismiss` tinyint(1) NOT NULL,
+  `chat` tinyint(1) NOT NULL,
+  `manager_chat` tinyint(1) NOT NULL,
+  `siege_master` tinyint(1) NOT NULL,
+  `join_siege` tinyint(1) NOT NULL,
+  PRIMARY KEY (`expedition_id`,`role`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+
+DROP TABLE IF EXISTS `family_members`;
 CREATE TABLE IF NOT EXISTS `family_members` (
   `character_id` int(11) NOT NULL,
   `family_id` int(11) NOT NULL,
@@ -122,6 +163,7 @@ CREATE TABLE IF NOT EXISTS `family_members` (
   PRIMARY KEY (`family_id`,`character_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `friends`;
 CREATE TABLE IF NOT EXISTS `friends` (
   `id` int(11) NOT NULL,
   `friend_id` int(11) NOT NULL,
@@ -129,6 +171,25 @@ CREATE TABLE IF NOT EXISTS `friends` (
   PRIMARY KEY (`id`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `housings`;
+CREATE TABLE IF NOT EXISTS `housings` (
+  `id` int(11) NOT NULL,
+  `account_id` int(10) UNSIGNED NOT NULL,
+  `owner` int(10) UNSIGNED NOT NULL,
+  `co_owner` int(10) UNSIGNED NOT NULL,
+  `template_id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `x` float NOT NULL,
+  `y` float NOT NULL,
+  `z` float NOT NULL,
+  `rotation_z` tinyint(4) NOT NULL,
+  `current_step` tinyint(4) NOT NULL,
+  `current_action` int(11) NOT NULL DEFAULT '0',
+  `permission` tinyint(4) NOT NULL,
+  PRIMARY KEY (`account_id`,`owner`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `items`;
 CREATE TABLE IF NOT EXISTS `items` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `type` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
@@ -138,6 +199,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `count` int(11) NOT NULL,
   `details` blob,
   `lifespan_mins` int(11) NOT NULL,
+  `made_unit_id` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `unsecure_time` datetime NOT NULL DEFAULT '0001-01-01 00:00:00',
   `unpack_time` datetime NOT NULL DEFAULT '0001-01-01 00:00:00',
   `owner` int(11) UNSIGNED NOT NULL,
@@ -147,6 +209,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   KEY `owner` (`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `mates`;
 CREATE TABLE IF NOT EXISTS `mates` (
   `id` int(11) UNSIGNED NOT NULL,
   `item_id` bigint(20) UNSIGNED NOT NULL,
@@ -162,6 +225,7 @@ CREATE TABLE IF NOT EXISTS `mates` (
   PRIMARY KEY (`id`,`item_id`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `options`;
 CREATE TABLE IF NOT EXISTS `options` (
   `key` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `value` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
@@ -169,6 +233,7 @@ CREATE TABLE IF NOT EXISTS `options` (
   PRIMARY KEY (`key`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `portal_book_coords`;
 CREATE TABLE IF NOT EXISTS `portal_book_coords` (
   `id` int(11) NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
@@ -182,6 +247,7 @@ CREATE TABLE IF NOT EXISTS `portal_book_coords` (
   PRIMARY KEY (`id`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `portal_visited_district`;
 CREATE TABLE IF NOT EXISTS `portal_visited_district` (
   `id` int(11) NOT NULL,
   `subzone` int(11) NOT NULL,
@@ -189,6 +255,7 @@ CREATE TABLE IF NOT EXISTS `portal_visited_district` (
   PRIMARY KEY (`id`,`subzone`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+DROP TABLE IF EXISTS `quests`;
 CREATE TABLE IF NOT EXISTS `quests` (
   `id` int(11) UNSIGNED NOT NULL,
   `template_id` int(11) UNSIGNED NOT NULL,
@@ -198,6 +265,7 @@ CREATE TABLE IF NOT EXISTS `quests` (
   PRIMARY KEY (`id`,`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `skills`;
 CREATE TABLE IF NOT EXISTS `skills` (
   `id` int(11) UNSIGNED NOT NULL,
   `level` tinyint(4) NOT NULL,

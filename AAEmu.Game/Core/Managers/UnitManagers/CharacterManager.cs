@@ -348,7 +348,7 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
                 }
             }
 
-            var content = FileManager.GetFileContents("./Data/CharTemplates.json");
+            var content = FileManager.GetFileContents($"{FileManager.AppPath}Data/CharTemplates.json");
             if (string.IsNullOrWhiteSpace(content))
                 throw new IOException(
                     $"File {FileManager.AppPath + "Data/CharTemplates.json"} doesn't exists or is empty.");
@@ -386,11 +386,12 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
             var nameValidationCode = NameManager.Instance.ValidationCharacterName(name);
             if (nameValidationCode == 0)
             {
-                NameManager.Instance.AddCharacterName(name);
+                var characterId = CharacterIdManager.Instance.GetNextId();
+                NameManager.Instance.AddCharacterName(characterId, name);
                 var template = GetTemplate(race, gender);
 
                 var character = new Character(customModel);
-                character.Id = CharacterIdManager.Instance.GetNextId();
+                character.Id = characterId;
                 character.AccountId = connection.AccountId;
                 character.Name = name.Substring(0, 1).ToUpper() + name.Substring(1);
                 character.Race = (Race) race;
@@ -500,7 +501,12 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
                     connection.SendPacket(new SCCreateCharacterResponsePacket(character));
                 }
                 else
+                {
                     connection.SendPacket(new SCCharacterCreationFailedPacket(3));
+                    CharacterIdManager.Instance.ReleaseId(characterId);
+                    NameManager.Instance.RemoveCharacterName(characterId);
+                    // TODO release items...
+                }
             }
             else
             {

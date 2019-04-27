@@ -66,7 +66,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
         Unk22 = 57,
         Unk23 = 58,
         Unk24 = 59,
-        Unk25 = 60,
+        SlaveCall = 60,
         Unk26 = 61,
         Unk27 = 63,
         CouponReceive = 64,
@@ -113,7 +113,15 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
         RuneItem = 106,
         GenderChange = 107,
         Unk47 = 108,
-        Unk48 = 109
+        Unk109 = 109,
+        Unk110 = 110,
+        Unk111 = 111,
+        Unk112 = 112,
+        Unk113 = 113,
+        Unk114 = 114,
+        ExitIndun = 115,
+        Unk116 = 116,
+        Unk117 = 117
     }
 
     public class SpecialEffect : EffectTemplate
